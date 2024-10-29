@@ -1,0 +1,143 @@
+<!-- 
+====TODO====
+게시판 그림판 페이지 나누기
+게시판에 본인 학번이름 적용시키기
+db적용
+node.js 코드 개선
+-->
+
+<!-- 
+====ICON====
+https://fonts.google.com/
+-->
+
+<!DOCTYPE html>
+<html lang="kr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>그림판</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="toolBox">
+        <label><input type="color" id="color">색깔</label>
+
+        <label>
+            <input type="range" id="lineWidth" min="1" max="50" value="5">
+            <p>
+                굵기: <span id="widthVal">5</span>
+            </p>
+        </label>
+
+        <div id="drawTool">
+            <label title="자유">
+                <input type="radio" id="shapes" name="shapes" value="자유" checked>
+                <span class="material-symbols-outlined">stylus_note</span>
+            </label>
+    
+            <label title="직선">
+                <input type="radio" id="shapes" name="shapes" value="직선">
+                <span class="material-symbols-outlined">pen_size_1</span>
+            </label>
+    
+            <label title="사각형">
+                <input type="radio" id="shapes" name="shapes" value="사각형">
+                <span class="material-symbols-outlined">check_box_outline_blank</span>
+            </label>
+    
+            <label title="원">
+                <input type="radio" id="shapes" name="shapes" value="원">
+                <span class="material-symbols-outlined">radio_button_unchecked</span>
+            </label>
+
+            <label title="텍스트">
+                <input type="radio" id="shapes" name="shapes" value="텍스트">
+                <span class="material-symbols-outlined">title</span>
+            </label>
+
+            <label title="지우개">
+                <input id="eraser" type="checkbox" value="지우개">
+                <span class="material-symbols-outlined">ink_eraser</span>
+            </label>
+        </div>
+            
+        <button class="material-symbols-outlined" type="button" id="clearPalette" title="모두지우기">delete</button>
+    
+
+        <div class="ajaxBox">   
+            <label>
+                <input class="ajaxBtn" type="checkbox">
+                <span class="material-symbols-outlined">post_add</button>
+            </label>
+            <div class="ajaxForm">
+                <div class="inputBox">
+                    <input type="text" class="ajaxInput" id="postName" placeholder="10101홍길동" autocomplete="off"><br>
+                    <button class="material-symbols-outlined ajaxBtn" id="postImg">send</button>
+                </div>
+                <span>게시판에 그림 올리기</span>
+            </div>
+        </div>
+
+        <div class="ajaxBox">
+            <label title="이메일로 그림 전송하기">
+                <input class="ajaxBtn" type="checkbox">
+                <span class="material-symbols-outlined">mail</span>
+            </label>
+            <div class="ajaxForm">
+                <div class="inputBox">
+                    <input type="email" class="ajaxInput" id="receptionEmail" placeholder="example@address.com" autocomplete="off"><br>
+                    <button class="material-symbols-outlined ajaxBtn" id="sendEmail">send</button>
+                </div>
+                <span>이메일로 그림 받기</span>
+            </div>
+        </div>
+
+        <button type="button" class="material-symbols-outlined" id="back" title="뒤로가기">undo</button>
+
+        <button type="button" class="material-symbols-outlined" id="forward" title="앞으로가기">redo</button>
+    </div>
+
+    <!-- palette : 최종적으로 그림이 출력 될 캔버스 / preview : 도형 사용 시 미리보기를 출력 할 캔버스 -->
+    <canvas id="palette"></canvas>
+    <canvas id="preview"></canvas>
+
+    <div id="blocker">
+    <!-- <div id="blocker" class="spin"> -->
+        <div>
+            <span id="sendTxt">이메일 전송중...</span>
+            <img src="img/loading.png" alt="loading">
+        </div>
+    </div>
+
+    <script src="js/jquery.js"></script>
+    <script src="js/script.js" defer></script>
+
+    <script>
+        const palette = document.getElementById('palette');
+        const preview = document.getElementById('preview');
+
+        palette.width = (window.innerWidth) * 2;
+        preview.width = (window.innerWidth) * 2;
+
+        palette.height = (window.innerHeight - 100) * 2;
+        preview.height = (window.innerHeight - 100) * 2;
+
+        palette.style.width = (window.innerWidth) + 'px';
+        preview.style.width = (window.innerWidth) + 'px';
+
+        palette.style.height = (window.innerHeight - 100) + 'px';
+        preview.style.height = (window.innerHeight - 100) + 'px';
+
+        const paletteContext = palette.getContext('2d');
+        const previewContext = preview.getContext('2d');
+
+        paletteContext.scale(2, 2);
+        previewContext.scale(2, 2);
+    </script>
+</body>
+
+</html>
