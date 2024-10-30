@@ -3,15 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>그림 게시판</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400" rel="stylesheet" />
+    <link rel="stylesheet" href="css/artPost.css">
+    <link rel="stylesheet" href="css/container.css">
 </head>
 <body>
-    <header>
-        <h2>그림 게시판</h2>
-    </header>
-
-    <div id="imgslide">
-        
+    <section>
+        <header>
+            <div id="title">
+                <h1>그림 게시판</h1>
+                <span>게시한 그림이 보이지 않는다면 게시판을 갱신해주세요!</span>
+            </div>
+            <button onclick="window.location.reload()">게시판 갱신하기</button>
+        </header>
+        <hr>
+        <article id="artPost"></article>
+    </section>
+    
+    <div class="imgBox" id="wire">
+        <div class="likeBox">
+            <form name="likeForm">
+                <button class="material-symbols-outlined likeBtn" type="button">favorite</button>
+                <input type="hidden" name="postId" value="">
+                <span class="likeCnt"></span>
+            </form>
+        </div>
+        <img src="" alt="">
+        <span class="postName"></span>
     </div>
+
+    <script src="js/jquery.js"></script>
+    <script src="js/artPost.js"></script>
 </body>
 </html>

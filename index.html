@@ -1,9 +1,8 @@
 <!-- 
 ====TODO====
-게시판 그림판 페이지 나누기
-게시판에 본인 학번이름 적용시키기
-db적용
-node.js 코드 개선
+그림 게시판 중복 막기
+그림 게시판에 좋아요 순위 만들기
+레이어 기능 만들기 (할 수 있다면)
 -->
 
 <!-- 
@@ -19,7 +18,8 @@ https://fonts.google.com/
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>그림판</title>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/palette.css">
+    <link rel="stylesheet" href="css/container.css">
 </head>
 
 <body>
@@ -96,9 +96,11 @@ https://fonts.google.com/
             </div>
         </div>
 
-        <button type="button" class="material-symbols-outlined" id="back" title="뒤로가기">undo</button>
-
-        <button type="button" class="material-symbols-outlined" id="forward" title="앞으로가기">redo</button>
+        <div id="artCtrl">
+            <button type="button" class="material-symbols-outlined" id="back" title="뒤로가기">undo</button>
+            <button type="button" class="material-symbols-outlined" id="forward" title="앞으로가기">redo</button>
+        </div>
+        
     </div>
 
     <!-- palette : 최종적으로 그림이 출력 될 캔버스 / preview : 도형 사용 시 미리보기를 출력 할 캔버스 -->
@@ -114,7 +116,7 @@ https://fonts.google.com/
     </div>
 
     <script src="js/jquery.js"></script>
-    <script src="js/script.js" defer></script>
+    <script src="js/palette.js" defer></script>
 
     <script>
         const palette = document.getElementById('palette');

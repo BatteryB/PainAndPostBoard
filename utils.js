@@ -6,10 +6,13 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const sqlite = require('sqlite3');
+
+const db = new sqlite.Database('db/paletteDB.db');
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.json({ limit: '100mb' }));
 app.use('/palette', express.static('palette'));
 
 const transporter = nodemailer.createTransport({
@@ -20,13 +23,27 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-//이메일로 전송하기
+//이미지 저장하고 메일로 전송하기
+app.post('/saveImage', (req, res) => {
+    const imageData = req.body.image;
+
+    const base64Data = imageData.replace(/^data:image\/png;base64,/, "");
+
+    const filePath = path.join(__dirname, 'palette', 'drawing.png');
+
+    fs.writeFile(filePath, base64Data, 'base64', (err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error saving image');
+        }
+    });
+});
+
 app.post('/sendEmail', (req, res) => {
     const { email } = req.body;
 
     const filePath = path.join(__dirname, 'palette', 'drawing.png'); // 이미지 파일 경로
 
-    // 이미지 파일 읽기
     fs.readFile(filePath, (err, data) => {
         if (err) {
             console.error("이미지 파일 읽기 오류:", err);
@@ -57,31 +74,15 @@ app.post('/sendEmail', (req, res) => {
     });
 });
 
-//이미지 저장하기
-app.post('/saveImage', (req, res) => {
+// 이미지 게시하기
+app.post('/postImage', async (req, res) => {
     const imageData = req.body.image;
+    const postName = req.body.postName;
 
     const base64Data = imageData.replace(/^data:image\/png;base64,/, "");
+    const filePath = path.join(__dirname, 'imgPost', `${postName}.png`);
 
-    const filePath = path.join(__dirname, 'palette', 'drawing.png');
-
-    fs.writeFile(filePath, base64Data, 'base64', (err) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Error saving image');
-        }
-    });
-});
-
-//이미지 게시하기
-let postNum = 1;
-app.post('/postImage', (req, res) => {
-    const imageData = req.body.image;
-
-    const base64Data = imageData.replace(/^data:image\/png;base64,/, "");
-
-    const filePath = path.join(__dirname, 'imgPost', `post${postNum}.png`);
-    postNum++;
+    await db.run(`insert into post_tbl(postName) values(?)`, [postName]);
 
     fs.writeFile(filePath, base64Data, 'base64', (err) => {
         if (err) {
@@ -93,27 +94,20 @@ app.post('/postImage', (req, res) => {
     });
 });
 
-//이미지 찾기
-app.post('/next-img/:num', (req, res) => {
-    let imgNum = parseInt(req.params.num);
-    const filePath = path.join(__dirname, `imgPost`, `post${imgNum}.png`);
-    fs.access(filePath, fs.constants.F_OK, (err) => {
-        if (err) {
-            if (imgNum == 1) {
-                res.status(200).send({ num: 0 });
-                // console.log(0)
-            } else {
-                res.status(200).send({ num: 1 });
-                // console.log(1)
-            }
-        } else {
-            res.status(200).send({ num: imgNum });
-            // console.log(imgNum)
-        }
+
+// post
+app.post('/getPostImg', async (req, res) => {
+    const postList = await new Promise(async (resolve, reject) => {
+        db.all(`select * from post_tbl`, (err, row) => resolve(row));
     })
+    res.status(200).send(postList)
+});
+
+app.post('/addLike', async (req, res) => {
+    const postId = req.body.postId;
+    await db.run(`update post_tbl set postLike = postLike + 1 where postId = ?`, [postId]);
+    res.status(200).send('like successful');
 })
-
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
