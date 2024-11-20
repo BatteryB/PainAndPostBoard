@@ -82,6 +82,10 @@ app.post('/postImage', async (req, res) => {
     const base64Data = imageData.replace(/^data:image\/png;base64,/, "");
     const filePath = path.join(__dirname, 'imgPost', `${postName}.png`);
 
+    if (fs.existsSync(filePath)) {
+        return res.status(400).send('이미 존재하는 파일 이름입니다.');
+    }
+
     await db.run(`insert into post_tbl(postName) values(?)`, [postName]);
 
     fs.writeFile(filePath, base64Data, 'base64', (err) => {
@@ -94,11 +98,10 @@ app.post('/postImage', async (req, res) => {
     });
 });
 
-
 // post
 app.post('/getPostImg', async (req, res) => {
     const postList = await new Promise(async (resolve, reject) => {
-        db.all(`select * from post_tbl`, (err, row) => resolve(row));
+        db.all(`select * from post_tbl order by postId desc`, (err, row) => resolve(row));
     })
     res.status(200).send(postList)
 });

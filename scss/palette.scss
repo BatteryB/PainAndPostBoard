@@ -1,0 +1,267 @@
+#palette {
+    position: absolute;
+    top: var(--topH);
+    left: 0;
+    z-index: 2;
+    touch-action: none;
+}
+
+#preview {
+    position: absolute;
+    top: var(--topH);
+    left: 0;
+    z-index: 2;
+}
+
+#toolBox {
+    width: 100%;
+    min-height: var(--topH);
+    border-bottom: 1px solid #000;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+
+    >:first-child {
+        margin-left: 20px;
+    }
+
+    >label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    input[type="checkbox"] {
+        display: none;
+    }
+
+    >*:nth-of-type(n+2) {
+        position: relative;
+        right: 0;
+    }
+
+}
+
+#toolBox>button,
+#ajaxBtn,
+#artCtrl>button {
+    height: var(--btnSize);
+    width: var(--btnSize);
+}
+
+#drawTool {
+    width: 380px;
+    height: 90px;
+    border: 1px solid #000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 10px;
+
+    span {
+        text-align: center;
+        font-size: 30px;
+    }
+
+    input {
+        display: none;
+    }
+    
+    >label {
+        height: var(--imgSize);
+        width: var(--imgSize);
+        padding: 10px;
+        border: 1px solid #000;
+        transition: .2s;
+
+        &:has(input:checked) {
+            background-color: lightgray;
+            transform: scale(1.1);
+            z-index: 2;
+        }
+    }
+}
+
+#artCtrl {
+    margin-left: auto;
+    display: flex;
+    gap: 10px;
+    margin-right: 20px;
+}
+
+.ajaxBox {
+    display: flex;
+    align-items: center;
+    position: relative;
+    gap: 10px;
+
+    >label {
+        width: var(--btnSize);
+        height: var(--btnSize);
+        background-color: #f0f0f0;
+        text-align: center;
+        position: relative;
+
+        &::before {
+            content: '';
+            border: 1px solid #000;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: calc(var(--btnSize) - 1px);
+            height: calc(var(--btnSize) - 1px);
+            border-radius: 2px;
+        }
+
+        &:hover {
+            background-color: lightgray;
+        }
+
+        &:has(input:checked) {
+            background-color: lightgray;
+        }
+
+        >span {
+            line-height: var(--btnSize);
+        }
+    }
+    
+    &:has(input:checked)>.ajaxForm {
+        display: block;
+    }
+}
+
+.ajaxForm {
+    display: none;
+
+    >span {
+        width: 200px;
+        display: inline-block;
+        text-align: center;
+        font-family: "굴림";
+        font-weight: bold;
+        font-size: 14px;
+    }
+}
+
+.ajaxBox
+.ajaxInput {
+    border-radius: 10px;
+    padding: 5px 27px 5px 3px;
+}
+
+.ajaxBtn {
+    position: absolute;
+    font-size: 19px;
+    top: 3px;
+    right: 8px;
+    border-radius: 9px;
+}
+
+#imgView {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 250px;
+    height: 100vh;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+
+    >h2 {
+        text-align: center;
+        margin: 0;
+        height: var(--topH);
+        line-height: var(--topH);
+        background-color: white;
+        z-index: 2;
+        position: relative;
+        border-bottom: 1px solid #000;
+    }
+
+    >img {
+        width: 222.8px;
+        height: 118.13px;
+        border: 1px solid #000;
+        position: absolute;
+        top: -35px;
+        left: 13.6px;
+        z-index: 1;
+    }
+}
+
+#layerBox {
+    width: 200px;
+    height: calc(100% - var(--topH));
+    border-left: 1px solid #000;
+    position: fixed;
+    right: 0;
+    top: var(--topH);
+    
+    >h5 {
+        margin: 5px;
+    }
+}
+
+#blocker {
+    visibility: hidden;
+    z-index: 999;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(128, 128, 128, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    >div {
+        background-color: lightgray;
+        min-width: 350px;
+        min-height: 200px;
+        border-radius: 50px;
+    
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+
+        >* {
+            padding: 20px 30px;
+        }
+    }
+
+    img {
+        width: 75px;
+        height: 75px;
+    }
+
+    span {
+        font-family: "굴림";
+        display: inline-block;
+        font-size: 40px;
+        text-align: center;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#blocker.spin {
+    visibility: visible;
+}
+
+#blocker.spin img {
+    animation: spin 1s linear infinite;
+}

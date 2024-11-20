@@ -1,210 +1,192 @@
-/**@type {WebGL2RenderingContext} */
-
 $(document).ready(function () {
-    const $palette = $('#palette');
-    const $preview = $('#preview');
-    const paletteContext = $palette[0].getContext('2d');
-    paletteContext.lineCap = 'round'; // 선 끝을 둥글게
-    paletteContext.lineJoin = 'round'; // 선의 교차점이 둥글게
+    const $palette = $('#palette')[0];
+    const paletteContext = $palette.getContext('2d');
+    paletteContext.lineCap = 'round';
+    paletteContext.lineJoin = 'round';
+    paletteContext.lineWidth = 5;
 
-    const previewContext = $preview[0].getContext('2d');
+    const $preview = $('#preview')[0];
+    const previewContext = $preview.getContext('2d');
     previewContext.lineCap = 'round';
     previewContext.lineJoin = 'round';
+    previewContext.lineWidth = 5;
 
-    let isPainting = false;
-    let isEraser = false;
-    let color = '#000000';
+    let drawing = false;
     let shapes = "자유";
-    let lineWidth = 5;
-    let startX, startY;
+    let startX, startY, currentX, currentY;
 
-    let canvasArr = [];
-    let backCnt = 0;
-    let isBack = false;
+    let drawLog = [];
+    let logIndex = -1;
 
-    // 마우스 클릭이 눌리면
-    $palette.on('mousedown', (e) => {
-        isPainting = true;
-        startX = e.clientX - $preview.offset().left;
-        startY = e.clientY - $preview.offset().top;
-        paletteContext.moveTo(startX, startY);
-
-        if (shapes == "자유" || isEraser) {
-            paletteContext.beginPath();
-        } else if (shapes == "텍스트") {
-            startX = e.clientX - $preview.offset().left;
-            startY = e.clientY - $preview.offset().top;
-
-            const textBox = prompt("텍스트를 입력해주세요.");
-            if (textBox == "" || textBox == null) {
-                alert("아무것도 입력되지 않았습니다.");
-                return;
-            }
-
-            paletteContext.font = `36px Arial`;
-            paletteContext.fillStyle = color;
-
-            const textMetrics = paletteContext.measureText(textBox);
-            const textWidth = textMetrics.width;
-            const textHeight = 24 * 0.7;
-            startX = startX - textWidth / 2;
-            startY = startY + textHeight / 2;
-
-            paletteContext.fillText(textBox, startX, startY);
-        }
-    });
-
-    // 마우스가 움직이면
-    $palette.on('mousemove', (e) => {
-        if (!isPainting) return;
-
-        const endX = e.clientX - $preview.offset().left;
-        const endY = e.clientY - $preview.offset().top;
-
-        // 지우개 모드 설정 / destination-out : 지우개 / source-over : 그리기
-        paletteContext.globalCompositeOperation = isEraser ? 'destination-out' : 'source-over';
-
-        if (shapes == "자유" || isEraser) {
-            paletteContext.lineTo(endX, endY);
-            paletteContext.strokeStyle = color;
-            paletteContext.lineWidth = lineWidth;
-            paletteContext.stroke();
-        } else {
-            previewContext.clearRect(0, 0, $preview[0].width, $preview[0].height);
-            previewContext.beginPath();
-            previewContext.strokeStyle = color;
-            previewContext.lineWidth = lineWidth;
-
-            if (shapes == "직선") {
-                previewContext.moveTo(startX, startY);
-                previewContext.lineTo(endX, endY);
-            } else if (shapes == "사각형") {
-                previewContext.rect(startX, startY, endX - startX, endY - startY);
-            } else if (shapes == "원") {
-                const radiusX = Math.abs(endX - startX) / 2;
-                const radiusY = Math.abs(endY - startY) / 2;
-                const centerX = (startX + endX) / 2;
-                const centerY = (startY + endY) / 2;
-                previewContext.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, Math.PI * 2);
-            }
-
-            previewContext.stroke();
-        }
-    });
-
-    // 마우스 클릭이 끝나면
-    $palette.on('mouseup', (e) => {
-        const endX = e.clientX - $preview.offset().left;
-        const endY = e.clientY - $preview.offset().top;
-        drowingShapes(endX, endY);
-        isPainting = false;
-
-        saveCanvas();
-        isBack = true
-    });
-
-    // 마우스가 팔레트 밖으로 나가면
-    $palette.on('mouseleave', () => {
-        isPainting = false;
-        paletteContext.closePath();
-        drowingShapes();
-        saveCanvas();
-    });
-
-    // 색
-    $('#color').on('input', (e) => {
-        color = $(e.target).val();
-    });
-
-    // 굵기
-    $('#lineWidth').on('input', (e) => {
-        lineWidth = $(e.target).val();
-        $("#widthVal").text(lineWidth);
-    });
-
-    // 지우개
-    $('#eraser').on('click', () => {
-        isEraser = !isEraser;
-    });
-
-    // 캔버스 전체 지우기
-    $('#clearPalette').on('click', () => {
-        paletteContext.clearRect(0, 0, $palette[0].width, $palette[0].height);
-        saveCanvas();
-    });
-
-    // 도형 버튼이 눌리면
-    $('input[name="shapes"]').on('change', () => {
-        shapes = $('#shapes:checked').val();
-    });
-
-    // 뒤로 or 앞으로 버튼이 눌리면
-    $('#back, #forward').on('click', function () {
-        if (!isBack) return;
-
-        if ($(this).attr('id') == 'back' && backCnt > 0) {
-            backCnt--;
-        } else if ($(this).attr('id') == 'forward' && backCnt < canvasArr.length - 1) {
-            backCnt++;
-        }
-
-        paletteContext.clearRect(0, 0, $palette[0].width, $palette[0].height);
-
-        paletteContext.save();
-        paletteContext.globalCompositeOperation = 'source-over';
-
-        paletteContext.scale(0.5, 0.5);
-        paletteContext.drawImage(canvasArr[backCnt], 0, 0);
-        paletteContext.restore();
-    });
-
-    // 팔레트에 도형 적용하는 함수
-    function drowingShapes(endX, endY) {
-        if (shapes != "자유") {
-            paletteContext.beginPath();
-            paletteContext.strokeStyle = color;
-            paletteContext.lineWidth = lineWidth;
-
-            if (shapes == "직선") {
-                paletteContext.moveTo(startX, startY);
-                paletteContext.lineTo(endX, endY);
-            } else if (shapes == "사각형") {
-                paletteContext.rect(startX, startY, endX - startX, endY - startY);
-            } else if (shapes == "원") {
-                const radiusX = Math.abs(endX - startX) / 2;
-                const radiusY = Math.abs(endY - startY) / 2;
-                const centerX = (startX + endX) / 2;
-                const centerY = (startY + endY) / 2;
-                paletteContext.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, Math.PI * 2);
-            }
-            paletteContext.stroke();
-        }
-        previewContext.closePath();
-        previewContext.clearRect(0, 0, $preview[0].width, $preview[0].height);
+    function startDrawing(x, y) {
+        drawing = true;
+        paletteContext.beginPath();
+        paletteContext.moveTo(x, y);
+        startX = x;
+        startY = y;
     }
 
-    // 뒤로가기 or 앞으로가기 캔버스 저장
-    function saveCanvas() {
-        if (backCnt < canvasArr.length - 1) {
-            canvasArr = canvasArr.slice(0, backCnt + 1);
+    function draw(x, y) {
+        if (shapes == "자유" || shapes == "지우개") {
+            paletteContext.globalCompositeOperation = shapes == "지우개" ? "destination-out" : "source-over";
+            paletteContext.lineTo(x, y);
+            paletteContext.stroke();
+        }
+    }
+
+    function previewLine(x, y) {
+        currentX = x;
+        currentY = y;
+        redraw();
+        previewContext.beginPath();
+        previewContext.moveTo(startX, startY);
+        previewContext.lineTo(currentX, currentY);
+        previewContext.stroke();
+    }
+
+    function previewRec(x, y) {
+        currentX = x;
+        currentY = y;
+        redraw();
+        const width = currentX - startX;
+        const height = currentY - startY;
+        previewContext.strokeRect(startX, startY, width, height);
+    }
+
+    function previewCircle(x, y) {
+        currentX = x;
+        currentY = y;
+        redraw();
+        const width = currentX - startX;
+        const height = currentY - startY;
+        previewContext.beginPath();
+        previewContext.ellipse(startX + width / 2, startY + height / 2, Math.abs(width / 2), Math.abs(height / 2), 0, 0, Math.PI * 2);
+        previewContext.stroke();
+    }
+
+    function stopDrawing() {
+        if (shapes == "직선") {
+            paletteContext.beginPath();
+            paletteContext.moveTo(startX, startY);
+            paletteContext.lineTo(currentX, currentY);
+            paletteContext.stroke();
+        } else if (shapes == "사각형") {
+            const width = currentX - startX;
+            const height = currentY - startY;
+            paletteContext.strokeRect(startX, startY, width, height);
+        } else if (shapes == "원") {
+            const width = currentX - startX;
+            const height = currentY - startY;
+            paletteContext.beginPath();
+            paletteContext.ellipse(startX + width / 2, startY + height / 2, Math.abs(width / 2), Math.abs(height / 2), 0, 0, Math.PI * 2);
+            paletteContext.stroke();
+        }
+        drawing = false;
+        redraw();
+        
+        if (logIndex < drawLog.length - 1) {
+            drawLog = drawLog.slice(0, logIndex + 1);
         }
 
-        // 새로운 캔버스 생성
-        const createcanvas = document.createElement('canvas');
+        drawLog.push($palette.toDataURL());
+        logIndex++;
+    }
 
-        // 캔버스 사이즈 똑같이
-        createcanvas.width = $palette[0].width;
-        createcanvas.height = $palette[0].height;
+    function loadImg(dataURL) {
+        const img = new Image();
+        img.src = dataURL;
+        img.onload = function () {
+            paletteContext.clearRect(0, 0, palette.width, palette.height);
+            paletteContext.drawImage(img, 0, 0, palette.width / 2, palette.height / 2); // 반으로 줄여서 그림
+        };
+    }
 
-        const canvasContext = createcanvas.getContext('2d');
+    function redraw() {
+        previewContext.clearRect(0, 0, $palette.width, $palette.height);
+    }
 
-        if (isEraser) canvasContext.globalCompositeOperation = 'source-over';
+    $('#preview').on('mousedown touchstart', (e) => {
+        const offset = $(e.currentTarget).offset();
+        const x = e.type === 'mousedown' ? e.clientX - offset.left : e.touches[0].clientX - offset.left;
+        const y = e.type === 'mousedown' ? e.clientY - offset.top : e.touches[0].clientY - offset.top;
 
-        // 팔레트 내용 복사
-        canvasContext.drawImage($palette[0], 0, 0);
+        if (shapes == "텍스트") {
+            const text = prompt('글 입력');
+            if(text == null) return;
+            const fontSize = $('#lineWidth').val() * 4;
+            paletteContext.font = `${fontSize}px gothic`;
 
-        canvasArr.push(createcanvas);
-        backCnt = canvasArr.length - 1
+            const textMetrics = paletteContext.measureText(text);
+            const textWidth = textMetrics.width;
+            const textHeight = fontSize;
+
+            const fixX = x - textWidth / 2;
+            const fixY = y + textHeight / 2;
+
+            paletteContext.fillText(text, fixX, fixY);
+            return;
+        }
+
+        startDrawing(x, y);
+        e.preventDefault();
+    }).on('mousemove touchmove', (e) => {
+        if (!drawing) return;
+
+        const offset = $(e.currentTarget).offset();
+        const x = e.type === 'mousemove' ? e.clientX - offset.left : e.touches[0].clientX - offset.left;
+        const y = e.type === 'mousemove' ? e.clientY - offset.top : e.touches[0].clientY - offset.top;
+
+        if (shapes == "자유" || shapes == "지우개") draw(x, y);
+        else if (shapes == "직선") previewLine(x, y);
+        else if (shapes == "사각형") previewRec(x, y);
+        else if (shapes == "원") previewCircle(x, y);
+
+        e.preventDefault();
+    }).on('mouseup touchend touchcancel', stopDrawing);
+
+    $('#clearPalette').on('click', function () {
+        paletteContext.clearRect(0, 0, $palette.width, $palette.height);
+    });
+
+    $('#color').on('input', function () {
+        paletteContext.strokeStyle = $(this).val();
+        previewContext.strokeStyle = $(this).val();
+    });
+
+    $('#lineWidth').on('input', function () {
+        paletteContext.lineWidth = $(this).val();
+        previewContext.lineWidth = $(this).val();
+        $('#widthVal').text($(this).val());
+    });
+
+    $('input[name="shapes"]').on('change', function () {
+        shapes = $('input[name="shapes"]:checked').val();
+        paletteContext.globalCompositeOperation = (shapes === "지우개") ? "destination-out" : "source-over";
+    });
+
+    $('#back').on('click', () => {
+        if (logIndex > 0) {
+            logIndex--;
+            loadImg(drawLog[logIndex]);
+        }
+    })
+
+    $('#forward').on('click', () => {
+        if (logIndex < drawLog.length - 1) {
+            logIndex++;
+            loadImg(drawLog[logIndex]);
+        }
+    })
+
+    // ======================
+    // =========AJAX=========
+    // ======================
+
+    function removeBlocker() {
+        setTimeout(() => {
+            $('#sendTxt').text('이메일 전송중...');
+            $('#blocker').removeClass('spin');
+        }, 2500);
     }
 
     // 캔버스 이미지저장 => 이메일 전송
@@ -225,17 +207,15 @@ $(document).ready(function () {
         $('#blocker').addClass('spin');
 
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = $palette[0].width;
-        tempCanvas.height = $palette[0].height;
+        tempCanvas.width = $palette.width;
+        tempCanvas.height = $palette.height;
         const tempContext = tempCanvas.getContext('2d');
 
-        // 임시 캔버스를 흰색으로 채움
         tempContext.fillStyle = 'white';
         tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
 
-        tempContext.drawImage($palette[0], 0, 0);
+        tempContext.drawImage($palette, 0, 0);
 
-        // 임시 캔버스를 데이터 URL로 변환
         const dataURL = tempCanvas.toDataURL('image/png');
 
         $.ajax({
@@ -267,15 +247,6 @@ $(document).ready(function () {
         });
     });
 
-    function removeBlocker() {
-        setTimeout(() => {
-            $('#sendTxt').text('이메일 전송중...');
-            $('#blocker').removeClass('spin');
-        }, 1000);
-    }
-
-    //========이미지 슬라이드=======
-
     $('#postImg').on('click', () => {
         const postName = $('#postName').val();
 
@@ -288,15 +259,15 @@ $(document).ready(function () {
         $('#blocker').addClass('spin');
 
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = $palette[0].width;
-        tempCanvas.height = $palette[0].height;
+        tempCanvas.width = $palette.width;
+        tempCanvas.height = $palette.height;
         const tempContext = tempCanvas.getContext('2d');
 
         // 임시 캔버스를 흰색으로 채움
         tempContext.fillStyle = 'white';
         tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
 
-        tempContext.drawImage($palette[0], 0, 0);
+        tempContext.drawImage($palette, 0, 0);
 
         // 임시 캔버스를 데이터 URL로 변환
         const dataURL = tempCanvas.toDataURL('image/png');
@@ -316,4 +287,4 @@ $(document).ready(function () {
             }
         });
     })
-})
+});

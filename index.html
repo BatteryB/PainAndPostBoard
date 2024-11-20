@@ -1,8 +1,6 @@
 <!-- 
 ====TODO====
-그림 게시판 중복 막기
-그림 게시판에 좋아요 순위 만들기
-레이어 기능 만들기 (할 수 있다면)
+palette.js 다시만들기(갤럭시 탭 안돼서) 
 -->
 
 <!-- 
@@ -27,7 +25,7 @@ https://fonts.google.com/
         <label><input type="color" id="color">색깔</label>
 
         <label>
-            <input type="range" id="lineWidth" min="1" max="50" value="5">
+            <input type="range" id="lineWidth" min="1" max="100" value="5">
             <p>
                 굵기: <span id="widthVal">5</span>
             </p>
@@ -60,14 +58,13 @@ https://fonts.google.com/
             </label>
 
             <label title="지우개">
-                <input id="eraser" type="checkbox" value="지우개">
+                <input type="radio" id="shapes" name="shapes" value="지우개">
                 <span class="material-symbols-outlined">ink_eraser</span>
             </label>
         </div>
             
         <button class="material-symbols-outlined" type="button" id="clearPalette" title="모두지우기">delete</button>
     
-
         <div class="ajaxBox">   
             <label>
                 <input class="ajaxBtn" type="checkbox">
@@ -75,7 +72,7 @@ https://fonts.google.com/
             </label>
             <div class="ajaxForm">
                 <div class="inputBox">
-                    <input type="text" class="ajaxInput" id="postName" placeholder="10101홍길동" autocomplete="off"><br>
+                    <input type="text" class="ajaxInput" id="postName" placeholder="그림 제목" autocomplete="off"><br>
                     <button class="material-symbols-outlined ajaxBtn" id="postImg">send</button>
                 </div>
                 <span>게시판에 그림 올리기</span>
@@ -100,12 +97,16 @@ https://fonts.google.com/
             <button type="button" class="material-symbols-outlined" id="back" title="뒤로가기">undo</button>
             <button type="button" class="material-symbols-outlined" id="forward" title="앞으로가기">redo</button>
         </div>
-        
     </div>
 
     <!-- palette : 최종적으로 그림이 출력 될 캔버스 / preview : 도형 사용 시 미리보기를 출력 할 캔버스 -->
     <canvas id="palette"></canvas>
     <canvas id="preview"></canvas>
+
+    <div id="layerBox">
+        <h5>레이어</h5>
+        <hr>
+    </div>
 
     <div id="blocker">
     <!-- <div id="blocker" class="spin"> -->
