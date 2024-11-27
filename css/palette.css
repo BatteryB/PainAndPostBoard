@@ -1,17 +1,14 @@
 @charset "UTF-8";
-#palette {
-  position: absolute;
-  top: var(--topH);
-  left: 0;
-  z-index: 2;
-  touch-action: none;
-}
-
+.palette,
 #preview {
   position: absolute;
   top: var(--topH);
-  left: 0;
+  right: 200px;
   z-index: 2;
+}
+
+#palette {
+  touch-action: none;
 }
 
 #toolBox {
@@ -38,15 +35,7 @@
   position: relative;
   right: 0;
 }
-
-#toolBox > button,
-#ajaxBtn,
-#artCtrl > button {
-  height: var(--btnSize);
-  width: var(--btnSize);
-}
-
-#drawTool {
+#toolBox > #drawTool {
   width: 380px;
   height: 90px;
   border: 1px solid #000;
@@ -57,24 +46,31 @@
   flex-direction: row;
   gap: 10px;
 }
-#drawTool span {
+#toolBox > #drawTool span {
   text-align: center;
   font-size: 30px;
 }
-#drawTool input {
+#toolBox > #drawTool input {
   display: none;
 }
-#drawTool > label {
+#toolBox > #drawTool > label {
   height: var(--imgSize);
   width: var(--imgSize);
   padding: 10px;
   border: 1px solid #000;
   transition: 0.2s;
 }
-#drawTool > label:has(input:checked) {
+#toolBox > #drawTool > label:has(input:checked) {
   background-color: lightgray;
   transform: scale(1.1);
   z-index: 2;
+}
+
+#toolBox > button,
+#ajaxBtn,
+#artCtrl > button {
+  height: var(--btnSize);
+  width: var(--btnSize);
 }
 
 #artCtrl {
@@ -84,46 +80,7 @@
   margin-right: 20px;
 }
 
-.ajaxBox {
-  display: flex;
-  align-items: center;
-  position: relative;
-  gap: 10px;
-}
-.ajaxBox > label {
-  width: var(--btnSize);
-  height: var(--btnSize);
-  background-color: #f0f0f0;
-  text-align: center;
-  position: relative;
-}
-.ajaxBox > label::before {
-  content: "";
-  border: 1px solid #000;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: calc(var(--btnSize) - 1px);
-  height: calc(var(--btnSize) - 1px);
-  border-radius: 2px;
-}
-.ajaxBox > label:hover {
-  background-color: lightgray;
-}
-.ajaxBox > label:has(input:checked) {
-  background-color: lightgray;
-}
-.ajaxBox > label > span {
-  line-height: var(--btnSize);
-}
-.ajaxBox:has(input:checked) > .ajaxForm {
-  display: block;
-}
-
-.ajaxForm {
-  display: none;
-}
-.ajaxForm > span {
+.ajaxBox > .ajaxForm > span {
   width: 200px;
   display: inline-block;
   text-align: center;
@@ -131,15 +88,18 @@
   font-weight: bold;
   font-size: 14px;
 }
-
-.ajaxBox .ajaxInput {
+.ajaxBox > .ajaxForm > .inputBox {
+  position: relative;
+}
+.ajaxBox > .ajaxForm > .inputBox > .ajaxInput {
   border-radius: 10px;
   padding: 5px 27px 5px 3px;
 }
-
-.ajaxBtn {
+.ajaxBox > .ajaxForm > .inputBox > .ajaxBtn {
   position: absolute;
-  font-size: 19px;
+  font-size: 18px;
+  width: 22px;
+  height: 22px;
   top: 3px;
   right: 8px;
   border-radius: 9px;
@@ -185,10 +145,42 @@
 #layerBox > h5 {
   margin: 5px;
 }
+#layerBox > #layerTab {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  padding: 5px;
+}
+#layerBox > #layerList {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+#layerBox > #layerList > .layer {
+  width: 100%;
+  padding: 2px 5px;
+  border-bottom: 1px solid #000;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
 
+.layer#wire {
+  visibility: hidden;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 #blocker {
   visibility: hidden;
-  z-index: 999;
+  z-index: 9999;
   width: 100%;
   height: 100vh;
   background-color: rgba(128, 128, 128, 0.5);
@@ -222,19 +214,9 @@
   font-size: 40px;
   text-align: center;
 }
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
 #blocker.spin {
   visibility: visible;
 }
-
 #blocker.spin img {
   animation: spin 1s linear infinite;
 }

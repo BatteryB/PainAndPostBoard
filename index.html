@@ -1,6 +1,6 @@
 <!-- 
 ====TODO====
-palette.js 다시만들기(갤럭시 탭 안돼서) 
+레이어 기능 추가(js)
 -->
 
 <!-- 
@@ -66,10 +66,6 @@ https://fonts.google.com/
         <button class="material-symbols-outlined" type="button" id="clearPalette" title="모두지우기">delete</button>
     
         <div class="ajaxBox">   
-            <label>
-                <input class="ajaxBtn" type="checkbox">
-                <span class="material-symbols-outlined">post_add</button>
-            </label>
             <div class="ajaxForm">
                 <div class="inputBox">
                     <input type="text" class="ajaxInput" id="postName" placeholder="그림 제목" autocomplete="off"><br>
@@ -80,10 +76,6 @@ https://fonts.google.com/
         </div>
 
         <div class="ajaxBox">
-            <label title="이메일로 그림 전송하기">
-                <input class="ajaxBtn" type="checkbox">
-                <span class="material-symbols-outlined">mail</span>
-            </label>
             <div class="ajaxForm">
                 <div class="inputBox">
                     <input type="email" class="ajaxInput" id="receptionEmail" placeholder="example@address.com" autocomplete="off"><br>
@@ -99,13 +91,30 @@ https://fonts.google.com/
         </div>
     </div>
 
-    <!-- palette : 최종적으로 그림이 출력 될 캔버스 / preview : 도형 사용 시 미리보기를 출력 할 캔버스 -->
-    <canvas id="palette"></canvas>
+    <!-- .palette : 최종적으로 그림이 출력 될 캔버스 -->
+    <!-- #preview : 도형 사용 시 미리보기를 출력 할 캔버스  -->
+    <canvas class="palette" id="palette"></canvas>
     <canvas id="preview"></canvas>
 
     <div id="layerBox">
-        <h5>레이어</h5>
+        <div id="layerTab">
+            <h5>LAYER</h5>
+            <div id="layerBtn">
+                <button type="button" class="material-symbols-outlined" id="addLayer" title="레이어 추가">add</button>
+            </div>
+        </div>
         <hr>
+        <div id="layerList">
+            <div class="layer">
+                레이어 1
+                <div class="layerOption">
+                    <button type="button" class="material-symbols-outlined layerUp" title="레이어 올리기">keyboard_arrow_up</button>
+                    <button type="button" class="material-symbols-outlined layerdown" title="레이어 내리기">keyboard_arrow_down</button>
+                    <button type="button" class="material-symbols-outlined layerRemove" title="레이어 제거">remove</button>
+                </div>
+                <input type="hidden" name="canvasId" value="1">
+            </div>
+        </div>
     </div>
 
     <div id="blocker">
@@ -116,6 +125,16 @@ https://fonts.google.com/
         </div>
     </div>
 
+    <div class="layer" id="wire">
+        <span class="layerName"></span>
+        <div class="layerOption">
+            <button type="button" class="material-symbols-outlined layerUp" title="레이어 올리기">keyboard_arrow_up</button>
+            <button type="button" class="material-symbols-outlined layerdown" title="레이어 내리기">keyboard_arrow_down</button>
+            <button type="button" class="material-symbols-outlined layerRemove" title="레이어 제거">remove</button>
+        </div>
+        <input type="hidden" class="canvasId" value="">
+    </div>
+
     <script src="js/jquery.js"></script>
     <script src="js/palette.js" defer></script>
 
@@ -123,14 +142,14 @@ https://fonts.google.com/
         const palette = document.getElementById('palette');
         const preview = document.getElementById('preview');
 
-        palette.width = (window.innerWidth) * 2;
-        preview.width = (window.innerWidth) * 2;
+        palette.width = (window.innerWidth - 200) * 2;
+        preview.width = (window.innerWidth - 200) * 2;
 
         palette.height = (window.innerHeight - 100) * 2;
         preview.height = (window.innerHeight - 100) * 2;
 
-        palette.style.width = (window.innerWidth) + 'px';
-        preview.style.width = (window.innerWidth) + 'px';
+        palette.style.width = (window.innerWidth - 200) + 'px';
+        preview.style.width = (window.innerWidth - 200) + 'px';
 
         palette.style.height = (window.innerHeight - 100) + 'px';
         preview.style.height = (window.innerHeight - 100) + 'px';

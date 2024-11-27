@@ -105,7 +105,7 @@ $(document).ready(function () {
         previewContext.clearRect(0, 0, $palette.width, $palette.height);
     }
 
-    $('#preview').on('mousedown touchstart', (e) => {
+    $('#preview').on('mousedown touchstart', function(e) {
         const offset = $(e.currentTarget).offset();
         const x = e.type === 'mousedown' ? e.clientX - offset.left : e.touches[0].clientX - offset.left;
         const y = e.type === 'mousedown' ? e.clientY - offset.top : e.touches[0].clientY - offset.top;
@@ -129,7 +129,7 @@ $(document).ready(function () {
 
         startDrawing(x, y);
         e.preventDefault();
-    }).on('mousemove touchmove', (e) => {
+    }).on('mousemove touchmove', function(e) {
         if (!drawing) return;
 
         const offset = $(e.currentTarget).offset();
@@ -144,22 +144,22 @@ $(document).ready(function () {
         e.preventDefault();
     }).on('mouseup touchend touchcancel', stopDrawing);
 
-    $('#clearPalette').on('click', function () {
+    $('#clearPalette').on('click', function() {
         paletteContext.clearRect(0, 0, $palette.width, $palette.height);
     });
 
-    $('#color').on('input', function () {
+    $('#color').on('input', function() {
         paletteContext.strokeStyle = $(this).val();
         previewContext.strokeStyle = $(this).val();
     });
 
-    $('#lineWidth').on('input', function () {
+    $('#lineWidth').on('input', function() {
         paletteContext.lineWidth = $(this).val();
         previewContext.lineWidth = $(this).val();
         $('#widthVal').text($(this).val());
     });
 
-    $('input[name="shapes"]').on('change', function () {
+    $('input[name="shapes"]').on('change', function() {
         shapes = $('input[name="shapes"]:checked').val();
         paletteContext.globalCompositeOperation = (shapes === "지우개") ? "destination-out" : "source-over";
     });
@@ -178,9 +178,23 @@ $(document).ready(function () {
         }
     })
 
+    const $layerList = $('#layerList');  
+    let layerCnt = 1;
+    $('#addLayer').on('click', () => {
+        const $layer = $('#wire').clone();
+        $layer.find('.layerName').text(`레이어 ${++layerCnt}`);
+        $layer.find('.cancasId').val(layerCnt);
+        $layer.removeAttr('id');    
+        $layerList.append($layer);
+    });
+
+    $("#layerList").on('click', '.layerRemove', function() {
+        $(this).closest('.layer').remove();
+    });
+
     // ======================
     // =========AJAX=========
-    // ======================
+    // =====================
 
     function removeBlocker() {
         setTimeout(() => {
@@ -238,11 +252,13 @@ $(document).ready(function () {
             success: function (response) {
                 $('#sendTxt').html('그림을 메일로 전송하였습니다.<br>메일을 확인해주세요');
                 removeBlocker();
+                $('#postName').val("");
             },
             error: function (error) {
                 console.error(error)
                 $('#sendTxt').html('메일 전송에 실패하였습니다.');
                 removeBlocker();
+                $('#receptionEmail').val("");
             }
         });
     });
@@ -251,7 +267,7 @@ $(document).ready(function () {
         const postName = $('#postName').val();
 
         if (postName == '') {
-            alert("학번이름을 입력해주세요.");
+            alert("그림의 이름을 적어주세요.");
             return;
         }
 

@@ -1,20 +1,17 @@
-#palette {
-    position: absolute;
-    top: var(--topH);
-    left: 0;
-    z-index: 2;
-    touch-action: none;
-}
-
+.palette, 
 #preview {
     position: absolute;
     top: var(--topH);
-    left: 0;
+    right: 200px;
     z-index: 2;
 }
 
+#palette {
+    touch-action: none;
+}
+
 #toolBox {
-    width: 100%;
+    width: 100%;    
     min-height: var(--topH);
     border-bottom: 1px solid #000;
     display: flex;
@@ -41,6 +38,40 @@
         right: 0;
     }
 
+    >#drawTool {
+        width: 380px;
+        height: 90px;
+        border: 1px solid #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        flex-direction: row;
+        gap: 10px;
+    
+        span {
+            text-align: center;
+            font-size: 30px;
+        }
+    
+        input {
+            display: none;
+        }
+        
+        >label {
+            height: var(--imgSize);
+            width: var(--imgSize);
+            padding: 10px;
+            border: 1px solid #000;
+            transition: .2s;
+    
+            &:has(input:checked) {
+                background-color: lightgray;
+                transform: scale(1.1);
+                z-index: 2;
+            }
+        }
+    }
 }
 
 #toolBox>button,
@@ -48,42 +79,6 @@
 #artCtrl>button {
     height: var(--btnSize);
     width: var(--btnSize);
-}
-
-#drawTool {
-    width: 380px;
-    height: 90px;
-    border: 1px solid #000;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    flex-direction: row;
-    gap: 10px;
-
-    span {
-        text-align: center;
-        font-size: 30px;
-    }
-
-    input {
-        display: none;
-    }
-    
-    >label {
-        height: var(--imgSize);
-        width: var(--imgSize);
-        padding: 10px;
-        border: 1px solid #000;
-        transition: .2s;
-
-        &:has(input:checked) {
-            background-color: lightgray;
-            transform: scale(1.1);
-            z-index: 2;
-        }
-    }
 }
 
 #artCtrl {
@@ -94,72 +89,37 @@
 }
 
 .ajaxBox {
-    display: flex;
-    align-items: center;
-    position: relative;
-    gap: 10px;
-
-    >label {
-        width: var(--btnSize);
-        height: var(--btnSize);
-        background-color: #f0f0f0;
-        text-align: center;
-        position: relative;
-
-        &::before {
-            content: '';
-            border: 1px solid #000;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: calc(var(--btnSize) - 1px);
-            height: calc(var(--btnSize) - 1px);
-            border-radius: 2px;
-        }
-
-        &:hover {
-            background-color: lightgray;
-        }
-
-        &:has(input:checked) {
-            background-color: lightgray;
-        }
-
-        >span {
-            line-height: var(--btnSize);
-        }
-    }
     
-    &:has(input:checked)>.ajaxForm {
-        display: block;
+    >.ajaxForm {
+        >span {
+            width: 200px;
+            display: inline-block;
+            text-align: center;
+            font-family: "굴림";
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        >.inputBox {
+            position: relative;
+
+            >.ajaxInput {
+                border-radius: 10px;
+                padding: 5px 27px 5px 3px;
+            }
+
+            >.ajaxBtn {
+                position: absolute;
+                font-size: 18px;
+                width: 22px;
+                height: 22px;
+                top: 3px;
+                right: 8px;
+                border-radius: 9px;
+            }
+        }
+
     }
-}
-
-.ajaxForm {
-    display: none;
-
-    >span {
-        width: 200px;
-        display: inline-block;
-        text-align: center;
-        font-family: "굴림";
-        font-weight: bold;
-        font-size: 14px;
-    }
-}
-
-.ajaxBox
-.ajaxInput {
-    border-radius: 10px;
-    padding: 5px 27px 5px 3px;
-}
-
-.ajaxBtn {
-    position: absolute;
-    font-size: 19px;
-    top: 3px;
-    right: 8px;
-    border-radius: 9px;
 }
 
 #imgView {
@@ -204,11 +164,48 @@
     >h5 {
         margin: 5px;
     }
+
+    >#layerTab {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-direction: row;
+        padding: 5px;
+    }
+
+    >#layerList {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        
+        >.layer {
+            width: 100%;
+            padding: 2px 5px;
+            border-bottom: 1px solid #000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+    }
+}
+
+.layer#wire {
+    visibility: hidden;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 #blocker {
     visibility: hidden;
-    z-index: 999;
+    z-index: 9999;
     width: 100%;
     height: 100vh;
     background-color: rgba(128, 128, 128, 0.5);
@@ -246,22 +243,12 @@
         font-size: 40px;
         text-align: center;
     }
-}
 
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
+    &.spin {
+        visibility: visible;
+    
+        img {
+            animation: spin 1s linear infinite;
+        }
     }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-#blocker.spin {
-    visibility: visible;
-}
-
-#blocker.spin img {
-    animation: spin 1s linear infinite;
 }
