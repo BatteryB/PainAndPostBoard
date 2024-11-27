@@ -1,6 +1,6 @@
 <!-- 
 ====TODO====
-레이어 기능 추가(js)
+레이어 순서 바꾸기 기능 구현(UI는 구현됨)
 -->
 
 <!-- 
@@ -93,7 +93,9 @@ https://fonts.google.com/
 
     <!-- .palette : 최종적으로 그림이 출력 될 캔버스 -->
     <!-- #preview : 도형 사용 시 미리보기를 출력 할 캔버스  -->
-    <canvas class="palette" id="palette"></canvas>
+    <div id="canvasList">
+        <canvas class="palette" id="1"></canvas>
+    </div>
     <canvas id="preview"></canvas>
 
     <div id="layerBox">
@@ -106,13 +108,16 @@ https://fonts.google.com/
         <hr>
         <div id="layerList">
             <div class="layer">
-                레이어 1
-                <div class="layerOption">
-                    <button type="button" class="material-symbols-outlined layerUp" title="레이어 올리기">keyboard_arrow_up</button>
-                    <button type="button" class="material-symbols-outlined layerdown" title="레이어 내리기">keyboard_arrow_down</button>
-                    <button type="button" class="material-symbols-outlined layerRemove" title="레이어 제거">remove</button>
-                </div>
-                <input type="hidden" name="canvasId" value="1">
+                <label>
+                    <input type="radio" name="layerRadio" checked>
+                    레이어 1
+                    <div class="layerOption">
+                        <button type="button" class="material-symbols-outlined layerUp" title="레이어 올리기">keyboard_arrow_up</button>
+                        <button type="button" class="material-symbols-outlined layerdown" title="레이어 내리기">keyboard_arrow_down</button>
+                        <button type="button" class="material-symbols-outlined layerRemove" title="레이어 제거">remove</button>
+                    </div>
+                    <input type="hidden" class="canvasId" value="1">
+                </label>
             </div>
         </div>
     </div>
@@ -126,20 +131,23 @@ https://fonts.google.com/
     </div>
 
     <div class="layer" id="wire">
-        <span class="layerName"></span>
-        <div class="layerOption">
-            <button type="button" class="material-symbols-outlined layerUp" title="레이어 올리기">keyboard_arrow_up</button>
-            <button type="button" class="material-symbols-outlined layerdown" title="레이어 내리기">keyboard_arrow_down</button>
-            <button type="button" class="material-symbols-outlined layerRemove" title="레이어 제거">remove</button>
-        </div>
-        <input type="hidden" class="canvasId" value="">
+        <label>
+            <input type="radio" name="layerRadio">
+            <span class="layerName"></span>
+            <div class="layerOption">
+                <button type="button" class="material-symbols-outlined layerUp" title="레이어 올리기">keyboard_arrow_up</button>
+                <button type="button" class="material-symbols-outlined layerdown" title="레이어 내리기">keyboard_arrow_down</button>
+                <button type="button" class="material-symbols-outlined layerRemove" title="레이어 제거">remove</button>
+            </div>
+            <input type="hidden" class="canvasId" value="">
+        </label>
     </div>
 
     <script src="js/jquery.js"></script>
     <script src="js/palette.js" defer></script>
 
     <script>
-        const palette = document.getElementById('palette');
+        const palette = document.getElementById('1');
         const preview = document.getElementById('preview');
 
         palette.width = (window.innerWidth - 200) * 2;

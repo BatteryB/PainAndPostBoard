@@ -1,9 +1,18 @@
 $(document).ready(function () {
-    const $palette = $('#palette')[0];
+    const $palette = $('#1')[0];
     const paletteContext = $palette.getContext('2d');
     paletteContext.lineCap = 'round';
     paletteContext.lineJoin = 'round';
     paletteContext.lineWidth = 5;
+
+    let ctxArr = [
+        {
+            canvasId: 1, 
+            canvas: $palette, 
+            ctx: paletteContext
+        }
+    ]
+    let correntCanvas = ctxArr[0];
 
     const $preview = $('#preview')[0];
     const previewContext = $preview.getContext('2d');
@@ -20,17 +29,17 @@ $(document).ready(function () {
 
     function startDrawing(x, y) {
         drawing = true;
-        paletteContext.beginPath();
-        paletteContext.moveTo(x, y);
+        correntCanvas.ctx.beginPath();
+        correntCanvas.ctx.moveTo(x, y);
         startX = x;
         startY = y;
     }
 
     function draw(x, y) {
         if (shapes == "자유" || shapes == "지우개") {
-            paletteContext.globalCompositeOperation = shapes == "지우개" ? "destination-out" : "source-over";
-            paletteContext.lineTo(x, y);
-            paletteContext.stroke();
+            correntCanvas.ctx.globalCompositeOperation = shapes == "지우개" ? "destination-out" : "source-over";
+            correntCanvas.ctx.lineTo(x, y);
+            correntCanvas.ctx.stroke();
         }
     }
 
@@ -66,29 +75,29 @@ $(document).ready(function () {
 
     function stopDrawing() {
         if (shapes == "직선") {
-            paletteContext.beginPath();
-            paletteContext.moveTo(startX, startY);
-            paletteContext.lineTo(currentX, currentY);
-            paletteContext.stroke();
+            correntCanvas.ctx.beginPath();
+            correntCanvas.ctx.moveTo(startX, startY);
+            correntCanvas.ctx.lineTo(currentX, currentY);
+            correntCanvas.ctx.stroke();
         } else if (shapes == "사각형") {
             const width = currentX - startX;
             const height = currentY - startY;
-            paletteContext.strokeRect(startX, startY, width, height);
+            correntCanvas.ctx.strokeRect(startX, startY, width, height);
         } else if (shapes == "원") {
             const width = currentX - startX;
             const height = currentY - startY;
-            paletteContext.beginPath();
-            paletteContext.ellipse(startX + width / 2, startY + height / 2, Math.abs(width / 2), Math.abs(height / 2), 0, 0, Math.PI * 2);
-            paletteContext.stroke();
+            correntCanvas.ctx.beginPath();
+            correntCanvas.ctx.ellipse(startX + width / 2, startY + height / 2, Math.abs(width / 2), Math.abs(height / 2), 0, 0, Math.PI * 2);
+            correntCanvas.ctx.stroke();
         }
         drawing = false;
         redraw();
-        
+
         if (logIndex < drawLog.length - 1) {
             drawLog = drawLog.slice(0, logIndex + 1);
         }
 
-        drawLog.push($palette.toDataURL());
+        drawLog.push(`$palette`.toDataURL());
         logIndex++;
     }
 
@@ -96,8 +105,8 @@ $(document).ready(function () {
         const img = new Image();
         img.src = dataURL;
         img.onload = function () {
-            paletteContext.clearRect(0, 0, palette.width, palette.height);
-            paletteContext.drawImage(img, 0, 0, palette.width / 2, palette.height / 2); // 반으로 줄여서 그림
+            correntCanvas.ctx.clearRect(0, 0, palette.width, palette.height);
+            correntCanvas.ctx.drawImage(img, 0, 0, palette.width / 2, palette.height / 2); // 반으로 줄여서 그림
         };
     }
 
@@ -105,31 +114,31 @@ $(document).ready(function () {
         previewContext.clearRect(0, 0, $palette.width, $palette.height);
     }
 
-    $('#preview').on('mousedown touchstart', function(e) {
+    $('#preview').on('mousedown touchstart', function (e) {
         const offset = $(e.currentTarget).offset();
         const x = e.type === 'mousedown' ? e.clientX - offset.left : e.touches[0].clientX - offset.left;
         const y = e.type === 'mousedown' ? e.clientY - offset.top : e.touches[0].clientY - offset.top;
 
         if (shapes == "텍스트") {
             const text = prompt('글 입력');
-            if(text == null) return;
+            if (text == null) return;
             const fontSize = $('#lineWidth').val() * 4;
-            paletteContext.font = `${fontSize}px gothic`;
+            correntCanvas.ctx.font = `${fontSize}px gothic`;
 
-            const textMetrics = paletteContext.measureText(text);
+            const textMetrics = correntCanvas.ctx.measureText(text);
             const textWidth = textMetrics.width;
             const textHeight = fontSize;
 
             const fixX = x - textWidth / 2;
             const fixY = y + textHeight / 2;
 
-            paletteContext.fillText(text, fixX, fixY);
+            correntCanvas.ctx.fillText(text, fixX, fixY);
             return;
         }
 
         startDrawing(x, y);
         e.preventDefault();
-    }).on('mousemove touchmove', function(e) {
+    }).on('mousemove touchmove', function (e) {
         if (!drawing) return;
 
         const offset = $(e.currentTarget).offset();
@@ -144,24 +153,24 @@ $(document).ready(function () {
         e.preventDefault();
     }).on('mouseup touchend touchcancel', stopDrawing);
 
-    $('#clearPalette').on('click', function() {
-        paletteContext.clearRect(0, 0, $palette.width, $palette.height);
+    $('#clearPalette').on('click', function () {
+        correntCanvas.ctx.clearRect(0, 0, $palette.width, $palette.height);
     });
 
-    $('#color').on('input', function() {
-        paletteContext.strokeStyle = $(this).val();
+    $('#color').on('input', function () {
+        correntCanvas.ctx.strokeStyle = $(this).val();
         previewContext.strokeStyle = $(this).val();
     });
 
-    $('#lineWidth').on('input', function() {
-        paletteContext.lineWidth = $(this).val();
+    $('#lineWidth').on('input', function () {
+        correntCanvas.ctx.lineWidth = $(this).val();
         previewContext.lineWidth = $(this).val();
         $('#widthVal').text($(this).val());
     });
 
-    $('input[name="shapes"]').on('change', function() {
+    $('input[name="shapes"]').on('change', function () {
         shapes = $('input[name="shapes"]:checked').val();
-        paletteContext.globalCompositeOperation = (shapes === "지우개") ? "destination-out" : "source-over";
+        correntCanvas.ctx.globalCompositeOperation = (shapes === "지우개") ? "destination-out" : "source-over";
     });
 
     $('#back').on('click', () => {
@@ -178,23 +187,62 @@ $(document).ready(function () {
         }
     })
 
-    const $layerList = $('#layerList');  
+    const $layerList = $('#layerList');
     let layerCnt = 1;
     $('#addLayer').on('click', () => {
         const $layer = $('#wire').clone();
         $layer.find('.layerName').text(`레이어 ${++layerCnt}`);
-        $layer.find('.cancasId').val(layerCnt);
-        $layer.removeAttr('id');    
+        $layer.find('.canvasId').val(layerCnt);
+        $layer.removeAttr('id');
         $layerList.append($layer);
+
+        $('#canvasList').append(`<canvas class="palette" id="${layerCnt}"></canvas>`)
+        const $newCanvas = $(`#${layerCnt}`)[0];
+
+        $newCanvas.width = (window.innerWidth - 200) * 2;
+        $newCanvas.height = (window.innerHeight - 100) * 2;
+        $newCanvas.style.width = (window.innerWidth - 200) + 'px';
+        $newCanvas.style.height = (window.innerHeight - 100) + 'px';
+
+        const newCanvasCtx = $newCanvas.getContext('2d');
+        newCanvasCtx.scale(2, 2);
+        newCanvasCtx.lineCap = 'round';
+        newCanvasCtx.lineJoin = 'round';
+        newCanvasCtx.lineWidth = 5;
+
+        ctxArr.push({
+                canvasId: layerCnt, 
+                canvas: $newCanvas, 
+                ctx: newCanvasCtx
+            });
+
     });
 
-    $("#layerList").on('click', '.layerRemove', function() {
-        $(this).closest('.layer').remove();
+    $("#layerList").on('click', '.layerRemove', function () {
+        const $layer = $(this).closest('.layer');
+        $(`#${$layer.find('.canvasId').val()}`).remove();
+        $layer.remove();
+    }).on('click', '.layerUp', function () {
+        const $layer = $(this).closest('.layer');
+        const $prevLayer = $layer.prev();
+
+        if ($prevLayer.length > 0) {
+            $layer.insertBefore($prevLayer);
+        }
+    }).on('click', '.layerdown', function () {
+        const $layer = $(this).closest('.layer');
+        const $nextLayer = $layer.next();
+
+        if ($nextLayer.length > 0) {
+            $layer.insertAfter($nextLayer);
+        }
+    }).on('click', '.layer', function() {
+        correntCanvas = ctxArr.find(canvas => canvas.canvasId == $(this).find('.canvasId ').val());
     });
 
     // ======================
     // =========AJAX=========
-    // =====================
+    // ======================
 
     function removeBlocker() {
         setTimeout(() => {

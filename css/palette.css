@@ -7,7 +7,7 @@
   z-index: 2;
 }
 
-#palette {
+.palette {
   touch-action: none;
 }
 
@@ -156,6 +156,9 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  height: calc(100% - 41px);
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 #layerBox > #layerList > .layer {
   width: 100%;
@@ -165,8 +168,15 @@
   flex-direction: column;
   gap: 5px;
 }
+#layerBox > #layerList > .layer input[type=radio] {
+  display: none;
+}
+#layerBox > #layerList > .layer:has(input:checked) {
+  background-color: red;
+}
 
-.layer#wire {
+.layer#wire,
+.palette#layerWire {
   visibility: hidden;
 }
 
