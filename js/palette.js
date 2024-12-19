@@ -5,13 +5,11 @@ $(document).ready(function () {
     paletteContext.lineJoin = 'round';
     paletteContext.lineWidth = 5;
 
-    let ctxArr = [
-        {
-            canvasId: 1, 
-            canvas: $palette, 
-            ctx: paletteContext
-        }
-    ]
+    let ctxArr = [{
+        canvasId: 1,
+        canvas: $palette,
+        ctx: paletteContext
+    }]
     let correntCanvas = ctxArr[0];
 
     const $preview = $('#preview')[0];
@@ -26,6 +24,10 @@ $(document).ready(function () {
 
     let drawLog = [];
     let logIndex = -1;
+
+    // ======================
+    // =======function=======
+    // ======================
 
     function startDrawing(x, y) {
         drawing = true;
@@ -93,26 +95,47 @@ $(document).ready(function () {
         drawing = false;
         redraw();
 
-        if (logIndex < drawLog.length - 1) {
-            drawLog = drawLog.slice(0, logIndex + 1);
-        }
+        // if (logIndex < drawLog.length - 1) {
+        //     drawLog = drawLog.slice(0, logIndex + 1);
+        // }
 
-        drawLog.push(`$palette`.toDataURL());
-        logIndex++;
+        // // drawLog.push({ // 기능 버림
+        // //     art: correntCanvas.toDataURL(), 
+        // //     layer: correntCanvas
+        // // }); // 뒤로가기, 앞으로가기
+        // logIndex++;
     }
 
-    function loadImg(dataURL) {
-        const img = new Image();
-        img.src = dataURL;
-        img.onload = function () {
-            correntCanvas.ctx.clearRect(0, 0, palette.width, palette.height);
-            correntCanvas.ctx.drawImage(img, 0, 0, palette.width / 2, palette.height / 2); // 반으로 줄여서 그림
-        };
-    }
+    // function loadImg(drawData) {
+    //     const img = new Image();
+    //     img.src = drawData.art;
+    //     img.onload = function () {
+    //         drawData.layer.ctx.clearRect(0, 0, drawData.layer.width, drawData.layer.height);
+    //         drawData.layer.ctx.drawImage(img, 0, 0, drawData.layer.width / 2, drawData.layer.height / 2); // 반으로 줄여서 그림
+    //     };
+    // }
 
     function redraw() {
         previewContext.clearRect(0, 0, $palette.width, $palette.height);
     }
+
+    function swapCanvasZIndex($canvas1, $canvas2) {
+        const zIndex1 = $canvas1.css('z-index');
+        const zIndex2 = $canvas2.css('z-index');
+        $canvas1.css('z-index', zIndex2);
+        $canvas2.css('z-index', zIndex1);
+    }
+
+    function getLayerAndCanvas($element) {
+        const $layer = $element.closest('.layer');
+        const canvasId = $layer.find('.canvasId').val();
+        const $canvas = $(`#${canvasId}`);
+        return { $layer, $canvas };
+    }
+
+    // ======================
+    // =========code=========
+    // ======================
 
     $('#preview').on('mousedown touchstart', function (e) {
         const offset = $(e.currentTarget).offset();
@@ -153,17 +176,19 @@ $(document).ready(function () {
         e.preventDefault();
     }).on('mouseup touchend touchcancel', stopDrawing);
 
-    $('#clearPalette').on('click', function () {
-        correntCanvas.ctx.clearRect(0, 0, $palette.width, $palette.height);
-    });
-
     $('#color').on('input', function () {
-        correntCanvas.ctx.strokeStyle = $(this).val();
+        ctxArr.forEach(palette => {
+            palette.ctx.strokeStyle = $(this).val();
+        });
+
         previewContext.strokeStyle = $(this).val();
     });
 
     $('#lineWidth').on('input', function () {
-        correntCanvas.ctx.lineWidth = $(this).val();
+        ctxArr.forEach(palette => {
+            palette.ctx.lineWidth = $(this).val();
+        });
+
         previewContext.lineWidth = $(this).val();
         $('#widthVal').text($(this).val());
     });
@@ -173,19 +198,19 @@ $(document).ready(function () {
         correntCanvas.ctx.globalCompositeOperation = (shapes === "지우개") ? "destination-out" : "source-over";
     });
 
-    $('#back').on('click', () => {
-        if (logIndex > 0) {
-            logIndex--;
-            loadImg(drawLog[logIndex]);
-        }
-    })
+    // $('#back').on('click', () => {
+    //     if (logIndex > 0) {
+    //         logIndex--;
+    //         loadImg(drawLog[logIndex]);
+    //     }
+    // })
 
-    $('#forward').on('click', () => {
-        if (logIndex < drawLog.length - 1) {
-            logIndex++;
-            loadImg(drawLog[logIndex]);
-        }
-    })
+    // $('#forward').on('click', () => {
+    //     if (logIndex < drawLog.length - 1) {
+    //         logIndex++;
+    //         loadImg(drawLog[logIndex]);
+    //     }
+    // })
 
     const $layerList = $('#layerList');
     let layerCnt = 1;
@@ -196,7 +221,7 @@ $(document).ready(function () {
         $layer.removeAttr('id');
         $layerList.append($layer);
 
-        $('#canvasList').append(`<canvas class="palette" id="${layerCnt}"></canvas>`)
+        $('#canvasList').append(`<canvas class="palette" id="${layerCnt}"></canvas>`);
         const $newCanvas = $(`#${layerCnt}`)[0];
 
         $newCanvas.width = (window.innerWidth - 200) * 2;
@@ -211,37 +236,46 @@ $(document).ready(function () {
         newCanvasCtx.lineWidth = 5;
 
         ctxArr.push({
-                canvasId: layerCnt, 
-                canvas: $newCanvas, 
-                ctx: newCanvasCtx
-            });
+            canvasId: layerCnt,
+            canvas: $newCanvas,
+            ctx: newCanvasCtx
+        });
 
+        for (let i = 0; i < ctxArr.length; i++) {
+            $(ctxArr[i].canvas).css("z-index", ctxArr.length - i);
+        }
     });
 
     $("#layerList").on('click', '.layerRemove', function () {
-        const $layer = $(this).closest('.layer');
-        $(`#${$layer.find('.canvasId').val()}`).remove();
+        const { $layer, $canvas } = getLayerAndCanvas($(this));
         $layer.remove();
+        $canvas.remove();
     }).on('click', '.layerUp', function () {
-        const $layer = $(this).closest('.layer');
+        const { $layer, $canvas } = getLayerAndCanvas($(this));
         const $prevLayer = $layer.prev();
 
         if ($prevLayer.length > 0) {
+            const prevCanvasId = $prevLayer.find('.canvasId').val();
+            const $prevCanvas = $(`#${prevCanvasId}`);
+            swapCanvasZIndex($canvas, $prevCanvas);
             $layer.insertBefore($prevLayer);
         }
     }).on('click', '.layerdown', function () {
-        const $layer = $(this).closest('.layer');
+        const { $layer, $canvas } = getLayerAndCanvas($(this));
         const $nextLayer = $layer.next();
 
         if ($nextLayer.length > 0) {
+            const nextCanvasId = $nextLayer.find('.canvasId').val();
+            const $nextCanvas = $(`#${nextCanvasId}`);
+            swapCanvasZIndex($canvas, $nextCanvas);
             $layer.insertAfter($nextLayer);
         }
-    }).on('click', '.layer', function() {
+    }).on('click', '.layer', function () {
         correntCanvas = ctxArr.find(canvas => canvas.canvasId == $(this).find('.canvasId ').val());
     });
 
     // ======================
-    // =========AJAX=========
+    // =========ajax=========
     // ======================
 
     function removeBlocker() {
@@ -251,12 +285,48 @@ $(document).ready(function () {
         }, 2500);
     }
 
+    async function getTempCanvas() {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = (window.innerWidth - 200) * 2;
+        tempCanvas.height = (window.innerHeight - 100) * 2;
+        tempCanvas.style.width = (window.innerWidth - 200) + 'px';
+        tempCanvas.style.height = (window.innerHeight - 100) + 'px';
+        const tempContext = tempCanvas.getContext('2d');
+        tempContext.fillStyle = 'white';
+        tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+        const imgDataArr = []
+        $('#layerList .layer').each(function () {
+            // const canvasImg = $(`#${$(this).find('.canvasId').val()}`);
+            const canvasImg = ctxArr.find(canvas => canvas.canvasId == $(this).find('.canvasId').val());
+            const dataURL = canvasImg.canvas.toDataURL('image/png');
+            imgDataArr.push(dataURL)
+        })
+        imgDataArr.reverse();
+        for (const imgData of imgDataArr) {
+            const img = await loadImage(imgData);
+            tempContext.drawImage(img, 0, 0);
+        }
+
+        return tempCanvas;
+    }
+
+    function loadImage(imageData) {
+        return new Promise(function (res, rej) {
+            const img = new Image();
+            img.src = imageData;
+            img.onload = function () {
+                res(img)
+            }
+        })
+    }
+
     // 캔버스 이미지저장 => 이메일 전송
-    $('#sendEmail').on('click', () => {
+    $('#sendEmail').off('click').on('click', async () => {
         const receptionEmail = $('#receptionEmail').val();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (receptionEmail == "") {
+        if (receptionEmail === "") {
             alert("이메일 주소를 입력해주세요.\n예) example@address.com");
             return;
         }
@@ -267,18 +337,10 @@ $(document).ready(function () {
         }
 
         $('#blocker').addClass('spin');
-
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = $palette.width;
-        tempCanvas.height = $palette.height;
-        const tempContext = tempCanvas.getContext('2d');
-
-        tempContext.fillStyle = 'white';
-        tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-        tempContext.drawImage($palette, 0, 0);
-
-        const dataURL = tempCanvas.toDataURL('image/png');
+        const tampCanvas = await getTempCanvas();
+        const dataURL = tampCanvas.toDataURL('image/png');
+        const img = new Image();
+        img.src = dataURL;
 
         $.ajax({
             type: "POST",
@@ -286,6 +348,7 @@ $(document).ready(function () {
             data: JSON.stringify({ image: dataURL }),
             contentType: "application/json",
             success: function (response) {
+                console.log('save Completed');
             },
             error: function (error) {
                 console.error("Error:", error);
@@ -311,7 +374,8 @@ $(document).ready(function () {
         });
     });
 
-    $('#postImg').on('click', () => {
+
+    $('#postImg').on('click', async () => {
         const postName = $('#postName').val();
 
         if (postName == '') {
@@ -322,19 +386,10 @@ $(document).ready(function () {
         $('#sendTxt').text('그림 게시중...');
         $('#blocker').addClass('spin');
 
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = $palette.width;
-        tempCanvas.height = $palette.height;
-        const tempContext = tempCanvas.getContext('2d');
-
-        // 임시 캔버스를 흰색으로 채움
-        tempContext.fillStyle = 'white';
-        tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-        tempContext.drawImage($palette, 0, 0);
-
-        // 임시 캔버스를 데이터 URL로 변환
-        const dataURL = tempCanvas.toDataURL('image/png');
+        const tampCanvas = await getTempCanvas();
+        const dataURL = tampCanvas.toDataURL('image/png');
+        const img = new Image();
+        img.src = dataURL;
 
         $.ajax({
             type: "post",

@@ -1,6 +1,7 @@
 <!-- 
 ====TODO====
-레이어 순서 바꾸기 기능 구현(UI는 구현됨)
+레이어 선택 ui수정
+뒤로가기, 앞으로가기 버그수정
 -->
 
 <!-- 
@@ -63,7 +64,7 @@ https://fonts.google.com/
             </label>
         </div>
             
-        <button class="material-symbols-outlined" type="button" id="clearPalette" title="모두지우기">delete</button>
+        <button class="material-symbols-outlined" type="button" id="clearPalette" title="모두지우기" onclick="window.location.reload()">delete</button>
     
         <div class="ajaxBox">   
             <div class="ajaxForm">
@@ -85,10 +86,10 @@ https://fonts.google.com/
             </div>
         </div>
 
-        <div id="artCtrl">
+        <!-- <div id="artCtrl"> =========버그 못 고침=========
             <button type="button" class="material-symbols-outlined" id="back" title="뒤로가기">undo</button>
             <button type="button" class="material-symbols-outlined" id="forward" title="앞으로가기">redo</button>
-        </div>
+        </div> -->
     </div>
 
     <!-- .palette : 최종적으로 그림이 출력 될 캔버스 -->
